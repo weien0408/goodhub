@@ -297,8 +297,8 @@ local function CreateSlider(text, max, settingKey)
 end
 
 -- UI 列表
-CreateButton("Aimbot (按鍵)", "AimbotEnabled")
-CreateButton("Silent Aim (鎖頭)", "SilentAimEnabled") -- 新增按鈕
+CreateButton("Aimbot", "AimbotEnabled")
+CreateButton("Auto Aimbot", "SilentAimEnabled") 
 CreateButton("Auto Fire (Legit)", "AutoFireEnabled")
 CreateButton("Visual ESP", "ESPEnabled")
 CreateButton("Flight Mode", "FlyEnabled")
