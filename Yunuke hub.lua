@@ -20,7 +20,8 @@ local Settings = {
     IsBinding = false,
     ChatSpamEnabled = false,
     ChatSpamText = "ezz",
-    ChatSpamDelay = 3
+    ChatSpamDelay = 3,
+    UpsideDownEnabled = false 
 }
 
 
@@ -145,7 +146,7 @@ for _, v in pairs(Players:GetPlayers()) do
 end
 Players.PlayerAdded:Connect(CreateESP)
 
--- // 5. UI 介面系統
+
 local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 ScreenGui.Name = "YUNUKE_V2_UI"
 
@@ -187,7 +188,7 @@ Container.Size = UDim2.new(1, -20, 1, -70)
 Container.Position = UDim2.new(0, 10, 0, 60)
 Container.BackgroundTransparency = 1
 Container.ScrollBarThickness = 2
-Container.CanvasSize = UDim2.new(0, 0, 0, 550)
+Container.CanvasSize = UDim2.new(0, 0, 0, 600)
 
 local UIListLayout = Instance.new("UIListLayout", Container)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -296,7 +297,7 @@ local function CreateSlider(text, max, settingKey)
     end)
 end
 
--- UI 列表
+
 CreateButton("Aimbot", "AimbotEnabled")
 CreateButton("Auto Aimbot", "SilentAimEnabled") 
 CreateButton("Auto Fire (Legit)", "AutoFireEnabled")
@@ -304,6 +305,7 @@ CreateButton("Visual ESP", "ESPEnabled")
 CreateButton("Flight Mode", "FlyEnabled")
 CreateButton("Noclip (Wall)", "NoclipEnabled")
 CreateButton("Spin Bot", "SpinEnabled")
+CreateButton("Upside Down", "UpsideDownEnabled") 
 CreateButton("Chat Spammer", "ChatSpamEnabled")
 
 CreateSlider("Spin Speed", 3000, "SpinSpeed")
@@ -350,6 +352,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+local MouseHolding = false
 
 UserInputService.InputBegan:Connect(function(i, g)
     if Settings.IsBinding then
@@ -360,12 +363,18 @@ UserInputService.InputBegan:Connect(function(i, g)
         SaveSettings()
         return
     end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        MouseHolding = true
+    end
     if not g and (i.KeyCode.Name == Settings.AimbotKey or i.UserInputType.Name == Settings.AimbotKey) then
         Settings.AimbotHolding = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        MouseHolding = false
+    end
     if i.KeyCode.Name == Settings.AimbotKey or i.UserInputType.Name == Settings.AimbotKey then
         Settings.AimbotHolding = false
     end
@@ -395,19 +404,15 @@ end
 
 
 RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", Enum.RenderPriority.Camera.Value + 1, function()
-    if (Settings.AimbotEnabled and Settings.AimbotHolding) or Settings.SilentAimEnabled then
+    if (Settings.AimbotEnabled and Settings.AimbotHolding) or (Settings.SilentAimEnabled and MouseHolding) then
         local target = GetClosestTarget()
         if target then
-            
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
-            
-           
             local root = GetRoot(LocalPlayer.Character)
             if root then
                 root.CFrame = CFrame.new(root.Position, Vector3.new(target.Position.X, root.Position.Y, target.Position.Z))
             end
 
-            
             if Settings.AutoFireEnabled and tick() - lastAutoFireTime >= Settings.AutoFireDelay then
                 if mouse1click then
                     mouse1click()
@@ -442,6 +447,8 @@ RunService.RenderStepped:Connect(function()
         local dir = Vector3.new(0,0,0)
         if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + Camera.CFrame.LookVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - Camera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + Camera.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - Camera.CFrame.RightVector end
         if dir.Magnitude > 0 then FlyingBodyVelocity.Velocity = dir * Settings.FlySpeed else FlyingBodyVelocity.Velocity = Vector3.new(0, 0.1, 0) end
     else
         if FlyingBodyVelocity then FlyingBodyVelocity:Destroy() FlyingBodyVelocity = nil FlyingBodyGyro:Destroy() FlyingBodyGyro = nil hum:ChangeState(Enum.HumanoidStateType.GettingUp) end
@@ -456,11 +463,16 @@ RunService.RenderStepped:Connect(function()
     end
 
 
-    if Settings.SpinEnabled and not (Settings.AimbotHolding or Settings.SilentAimEnabled) then
+    if Settings.SpinEnabled and not (Settings.AimbotHolding or (Settings.SilentAimEnabled and MouseHolding)) then
         hum.AutoRotate = false
         root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(Settings.SpinSpeed / 10), 0)
     elseif not Settings.SpinEnabled and not Settings.FlyEnabled then
         hum.AutoRotate = true
+    end
+
+
+    if Settings.UpsideDownEnabled then
+        root.CFrame = root.CFrame * CFrame.Angles(0, 0, math.rad(180))
     end
 end)
 
