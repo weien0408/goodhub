@@ -1,4 +1,3 @@
--- [[ YUNUKE HUB PREMIUM V2 - SOLIX AIMBOT INTEGRATED ]]
 repeat wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
@@ -6,11 +5,12 @@ local FileName = "YUNUKE_CONFIG_V2.json"
 
 local Settings = {
     AimbotEnabled = false,
+    SilentAimEnabled = false, 
     AimbotKey = "B",
     AimbotPart = "Head",
     AimbotHolding = false,
     AutoFireEnabled = false,
-    AutoFireDelay = 0.05, -- 稍微調低延遲以應對 RIVALS
+    AutoFireDelay = 0.05, 
     FlyEnabled = false,
     FlySpeed = 200,
     NoclipEnabled = false,
@@ -19,11 +19,11 @@ local Settings = {
     ESPEnabled = false,
     IsBinding = false,
     ChatSpamEnabled = false,
-    ChatSpamText = "YUNUKE HUB ON TOP!",
+    ChatSpamText = "ezz",
     ChatSpamDelay = 3
 }
 
--- // 1. 設定檔處理
+
 local function SaveSettings()
     local success, encoded = pcall(function()
         return HttpService:JSONEncode(Settings)
@@ -51,7 +51,7 @@ end
 
 LoadSettings()
 
--- // 2. 服務與變數
+
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -62,12 +62,12 @@ local LocalPlayer = Players.LocalPlayer
 local lastAutoFireTime = 0
 local lastChatTime = 0
 
--- // 3. 核心工具
+
 local function GetRoot(char)
     return char and char:FindFirstChild("HumanoidRootPart")
 end
 
--- // 4. ESP 繪圖系統
+
 local function CreateESP(player)
     local Box = Drawing.new("Square")
     Box.Visible = false
@@ -177,7 +177,7 @@ HeaderHide.BorderSizePixel = 0
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "YUNUKE PREMIUM V2"
+Title.Text = "YUNUKE HUB"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
@@ -296,7 +296,9 @@ local function CreateSlider(text, max, settingKey)
     end)
 end
 
-CreateButton("Aimbot Master", "AimbotEnabled")
+-- UI 列表
+CreateButton("Aimbot (按鍵)", "AimbotEnabled")
+CreateButton("Silent Aim (鎖頭)", "SilentAimEnabled") -- 新增按鈕
 CreateButton("Auto Fire (Legit)", "AutoFireEnabled")
 CreateButton("Visual ESP", "ESPEnabled")
 CreateButton("Flight Mode", "FlyEnabled")
@@ -322,7 +324,7 @@ BindBtn.MouseButton1Click:Connect(function()
     BindBtn.Text = "... Press Any Key ..."
 end)
 
--- UI 拖動
+
 local draggingUI, dragInputUI, dragStartUI, startPosUI
 Header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -348,7 +350,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- // 6. 輸入處理邏輯
+
 UserInputService.InputBegan:Connect(function(i, g)
     if Settings.IsBinding then
         local key = (i.UserInputType == Enum.UserInputType.Keyboard and i.KeyCode.Name) or i.UserInputType.Name
@@ -369,8 +371,7 @@ UserInputService.InputEnded:Connect(function(i)
     end
 end)
 
--- // 7. 整合 Solix Hub 核心 Aimbot 鎖定系統
--- 使用最高級別優先權 RenderStep 解決連射不準問題
+
 local function GetClosestTarget()
     local target = nil
     local dist = math.huge
@@ -392,21 +393,21 @@ local function GetClosestTarget()
     return target
 end
 
--- 解決「第一發準其餘不準」的核心：強制覆蓋相機
+
 RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", Enum.RenderPriority.Camera.Value + 1, function()
-    if Settings.AimbotEnabled and Settings.AimbotHolding then
+    if (Settings.AimbotEnabled and Settings.AimbotHolding) or Settings.SilentAimEnabled then
         local target = GetClosestTarget()
         if target then
-            -- 1. 強制相機看向目標
+            
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
             
-            -- 2. 同步角色根組件 (RIVALS 必做，解決角色轉動與相機不同步)
+           
             local root = GetRoot(LocalPlayer.Character)
             if root then
                 root.CFrame = CFrame.new(root.Position, Vector3.new(target.Position.X, root.Position.Y, target.Position.Z))
             end
 
-            -- 3. 自動射擊邏輯
+            
             if Settings.AutoFireEnabled and tick() - lastAutoFireTime >= Settings.AutoFireDelay then
                 if mouse1click then
                     mouse1click()
@@ -421,7 +422,7 @@ RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", Enum.RenderPriority.Camera.Valu
     end
 end)
 
--- // 8. 其他功能循環 (Fly, Spin, Chat)
+
 RunService.RenderStepped:Connect(function()
     local char = LocalPlayer.Character
     local root = GetRoot(char)
@@ -454,7 +455,8 @@ RunService.RenderStepped:Connect(function()
         lastChatTime = tick()
     end
 
-    if Settings.SpinEnabled and not Settings.AimbotHolding then
+
+    if Settings.SpinEnabled and not (Settings.AimbotHolding or Settings.SilentAimEnabled) then
         hum.AutoRotate = false
         root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(Settings.SpinSpeed / 10), 0)
     elseif not Settings.SpinEnabled and not Settings.FlyEnabled then
@@ -462,7 +464,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Noclip (穿牆)
+
 RunService.Stepped:Connect(function()
     if Settings.NoclipEnabled and LocalPlayer.Character then
         for _, p in pairs(LocalPlayer.Character:GetDescendants()) do
