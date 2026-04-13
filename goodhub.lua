@@ -178,7 +178,7 @@ HeaderHide.BorderSizePixel = 0
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "YUNUKE HUB"
+Title.Text = "GOOD HUB"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
@@ -306,7 +306,7 @@ CreateButton("Flight Mode", "FlyEnabled")
 CreateButton("Noclip (Wall)", "NoclipEnabled")
 CreateButton("Spin Bot", "SpinEnabled")
 CreateButton("Upside Down", "UpsideDownEnabled") 
-CreateButton("Chat Spammer", "ChatSpamEnabled")
+CreateButton("unknown", "unknown")
 
 CreateSlider("Spin Speed", 3000, "SpinSpeed")
 CreateSlider("Flight Speed", 1000, "FlySpeed")
