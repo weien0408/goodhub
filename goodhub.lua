@@ -396,20 +396,25 @@ RunService.RenderStepped:Connect(function()
     local char = LocalPlayer.Character local root = GetRoot(char) local hum = char and char:FindFirstChild("Humanoid")
     if not root or not hum then return end
     if Settings.FlyEnabled then
-        hum:ChangeState(Enum.HumanoidStateType.Physics) root.Velocity = Vector3.new(0, 0, 0)
-        if not FlyingBodyVelocity then
-            FlyingBodyVelocity = Instance.new("BodyVelocity", root) FlyingBodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-            FlyingBodyGyro = Instance.new("BodyGyro", root) FlyingBodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-        end
-        FlyingBodyGyro.CFrame = Camera.CFrame
-        local dir = Vector3.new(0,0,0)
+        hum:ChangeState(Enum.HumanoidStateType.Physics)
+        root.Velocity = Vector3.new(0, 0, 0)
+        
+        local dt = task.wait() -
+        local dir = Vector3.new(0, 0, 0)
         if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + Camera.CFrame.LookVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - Camera.CFrame.LookVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + Camera.CFrame.RightVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - Camera.CFrame.RightVector end
-        FlyingBodyVelocity.Velocity = dir.Magnitude > 0 and dir * Settings.FlySpeed or Vector3.new(0, 0.1, 0)
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then dir = dir - Vector3.new(0, 1, 0) end
+
+        if dir.Magnitude > 0 then
+            root.CFrame = root.CFrame + (dir.Unit * Settings.FlySpeed * dt)
+        end
     else
-        if FlyingBodyVelocity then FlyingBodyVelocity:Destroy() FlyingBodyVelocity = nil FlyingBodyGyro:Destroy() FlyingBodyGyro = nil hum:ChangeState(Enum.HumanoidStateType.GettingUp) end
+        if hum.FloorMaterial ~= Enum.Material.Air then
+            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
     end
     if Settings.SpinEnabled and not (Settings.AimbotHolding or (Settings.SilentAimEnabled and MouseHolding)) then
         hum.AutoRotate = false root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(Settings.SpinSpeed / 10), 0)
