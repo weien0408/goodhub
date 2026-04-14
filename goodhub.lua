@@ -195,7 +195,24 @@ local UIListLayout = Instance.new("UIListLayout", Container)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 8)
 
+local SkinBtnFrame = Instance.new("TextButton", Container)
+SkinBtnFrame.Size = UDim2.new(1, 0, 0, 40)
+SkinBtnFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45) 
+SkinBtnFrame.AutoButtonColor = true
+SkinBtnFrame.Text = ""
 
+local SkinCorner = Instance.new("UICorner", SkinBtnFrame)
+SkinCorner.CornerRadius = UDim.new(0, 6)
+
+local SkinLabel = Instance.new("TextLabel", SkinBtnFrame)
+SkinLabel.Size = UDim2.new(1, 0, 1, 0)
+SkinLabel.BackgroundTransparency = 1
+SkinLabel.Text = "GUN SKIN"
+SkinLabel.TextColor3 = Color3.new(1, 1, 1)
+SkinLabel.Font = Enum.Font.GothamBold
+SkinLabel.TextSize = 13
+SkinLabel.TextXAlignment = Enum.TextXAlignment.Center
+BindBtn.MouseButton1Click:Connect(function()
 
 local function CreateButton(text, key)
     local BtnFrame = Instance.new("TextButton", Container)
@@ -325,24 +342,7 @@ BindBtn.TextSize = 13
 local BindCorner = Instance.new("UICorner", BindBtn)
 BindCorner.CornerRadius = UDim.new(0, 6)
 
-local SkinBtnFrame = Instance.new("TextButton", Container)
-SkinBtnFrame.Size = UDim2.new(1, 0, 0, 40)
-SkinBtnFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45) 
-SkinBtnFrame.AutoButtonColor = true
-SkinBtnFrame.Text = ""
 
-local SkinCorner = Instance.new("UICorner", SkinBtnFrame)
-SkinCorner.CornerRadius = UDim.new(0, 6)
-
-local SkinLabel = Instance.new("TextLabel", SkinBtnFrame)
-SkinLabel.Size = UDim2.new(1, 0, 1, 0)
-SkinLabel.BackgroundTransparency = 1
-SkinLabel.Text = "GUN SKIN"
-SkinLabel.TextColor3 = Color3.new(1, 1, 1)
-SkinLabel.Font = Enum.Font.GothamBold
-SkinLabel.TextSize = 13
-SkinLabel.TextXAlignment = Enum.TextXAlignment.Center
-BindBtn.MouseButton1Click:Connect(function()
     Settings.IsBinding = true
     BindBtn.Text = "... Press Any Key ..."
 end)
