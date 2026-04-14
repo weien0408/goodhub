@@ -21,7 +21,9 @@ local Settings = {
     ChatSpamEnabled = false,
     ChatSpamText = "ezz",
     ChatSpamDelay = 3,
-    UpsideDownEnabled = false 
+    UpsideDownEnabled = false,
+    SkinEnabled = false
+
 }
 
 
@@ -306,7 +308,7 @@ CreateButton("FlY", "FlyEnabled")
 CreateButton("Noclip", "NoclipEnabled")
 CreateButton("Spin Bot", "SpinEnabled")
 CreateButton("Upside Down", "UpsideDownEnabled") 
-CreateButton("SKIN", "loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))()")
+CreateButton("SKIN", "SkinEnabled")
 CreateButton("GOODHUB", "unknown")
 
 CreateSlider("Spin Speed", 3000, "SpinSpeed")
@@ -470,6 +472,8 @@ RunService.RenderStepped:Connect(function()
     elseif not Settings.SpinEnabled and not Settings.FlyEnabled then
         hum.AutoRotate = true
     end
+    if Settings.SkinEnabled
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))()
 
 
     if Settings.UpsideDownEnabled then
