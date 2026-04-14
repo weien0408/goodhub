@@ -32,13 +32,19 @@ end
 local function LoadSettings()
     if isfile(FileName) then
         local success, content = pcall(function() return readfile(FileName) end)
-        if success then
-
-            local decode_success, decoded = pcall(function() return HttpService:JSONDecode(content) end)
-                        if decode_success and type(decoded) == "table" then
+        if success and content ~= "" then
+            local decode_success, decoded = pcall(function() 
+                return HttpService:JSONDecode(content) 
+            end)
+            
+            if decode_success and type(decoded) == "table" then
                 for k, v in pairs(decoded) do 
-                    if Settings[k] ~= nil then Settings[k] = v end 
+                    if Settings[k] ~= nil then 
+                        Settings[k] = v 
+                    end 
                 end
+            else
+                warn("設定檔格式錯誤，已載入預設值")
             end
         end
     end
