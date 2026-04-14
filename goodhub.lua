@@ -33,8 +33,13 @@ local function LoadSettings()
     if isfile(FileName) then
         local success, content = pcall(function() return readfile(FileName) end)
         if success then
-            local decoded = HttpService:JSONDecode(content)
-            for k, v in pairs(decoded) do if Settings[k] ~= nil then Settings[k] = v end end
+
+            local decode_success, decoded = pcall(function() return HttpService:JSONDecode(content) end)
+                        if decode_success and type(decoded) == "table" then
+                for k, v in pairs(decoded) do 
+                    if Settings[k] ~= nil then Settings[k] = v end 
+                end
+            end
         end
     end
 end
@@ -156,7 +161,7 @@ Container.Size = UDim2.new(1, -20, 1, -70)
 Container.Position = UDim2.new(0, 10, 0, 60)
 Container.BackgroundTransparency = 1
 Container.ScrollBarThickness = 2
-Container.CanvasSize = UDim2.new(0, 0, 0, 750)
+Container.CanvasSize = UDim2.new(0, 0, 0, 950)
 local UIListLayout = Instance.new("UIListLayout", Container)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 8)
