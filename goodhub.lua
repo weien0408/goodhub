@@ -65,36 +65,49 @@ local function GetRoot(char) return char and char:FindFirstChild("HumanoidRootPa
 
 
 local function CreateESP(player)
+    -- 原有的方塊與血條
     local Box = Drawing.new("Square")
-    Box.Visible = false
-    Box.Color = Color3.fromRGB(255, 255, 255)
-    Box.Thickness = 1.5
-    Box.Transparency = 1
-    Box.Filled = false
-
     local HealthBarOutline = Drawing.new("Square")
-    HealthBarOutline.Visible = false
-    HealthBarOutline.Color = Color3.fromRGB(0, 0, 0)
-    HealthBarOutline.Thickness = 1
-    HealthBarOutline.Transparency = 1
-    HealthBarOutline.Filled = true
-
     local HealthBar = Drawing.new("Square")
-    HealthBar.Visible = false
-    HealthBar.Color = Color3.fromRGB(0, 255, 0)
-    HealthBar.Thickness = 1
-    HealthBar.Transparency = 1
-    HealthBar.Filled = true
+    
+    -- 骨架線段容器
+    local Skeleton = {}
+    local BodyParts = {
+        {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"}, -- 軀幹
+        {"UpperTorso", "LeftUpperArm"}, {"LeftUpperArm", "LeftLowerArm"}, {"LeftLowerArm", "LeftHand"}, -- 左手
+        {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"}, {"RightLowerArm", "RightHand"}, -- 右手
+        {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"}, -- 左腳
+        {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"} -- 右腳
+    }
+    -- 針對 R6 兼容處理 (如果不是 R15)
+    local BodyPartsR6 = {
+        {"Head", "Torso"}, {"Torso", "Left Arm"}, {"Torso", "Right Arm"},
+        {"Torso", "Left Leg"}, {"Torso", "Right Leg"}
+    }
+
+    local function CreateLines(amt)
+        for i = 1, amt do
+            local line = Drawing.new("Line")
+            line.Visible = false
+            line.Color = Color3.fromRGB(255, 255, 255)
+            line.Thickness = 1
+            line.Transparency = 1
+            table.insert(Skeleton, line)
+        end
+    end
+    CreateLines(15) -- 預建足夠的線段
 
     local function Update()
         local connection
         connection = RunService.RenderStepped:Connect(function()
             if Settings.ESPEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 and player ~= LocalPlayer then
-                local rootPart = player.Character.HumanoidRootPart
-                local hum = player.Character.Humanoid
+                local char = player.Character
+                local rootPart = char.HumanoidRootPart
+                local hum = char.Humanoid
                 local position, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
                 
                 if onScreen then
+                    -- [ 1. 原有的方塊與血條更新 ]
                     local sizeX = 2200 / position.Z
                     local sizeY = 3200 / position.Z
                     local boxPos = Vector2.new(position.X - sizeX / 2, position.Y - sizeY / 2)
@@ -103,31 +116,50 @@ local function CreateESP(player)
                     Box.Position = boxPos
                     Box.Visible = true
 
-                    local barWidth = 3
-                    local barHeight = sizeY
                     local healthPercent = math.clamp(hum.Health / hum.MaxHealth, 0, 1)
-                    
-                    HealthBarOutline.Size = Vector2.new(barWidth + 2, barHeight + 2)
-                    HealthBarOutline.Position = Vector2.new(boxPos.X - barWidth - 5, boxPos.Y - 1)
+                    HealthBarOutline.Size = Vector2.new(5, sizeY + 2)
+                    HealthBarOutline.Position = Vector2.new(boxPos.X - 7, boxPos.Y - 1)
                     HealthBarOutline.Visible = true
-                    
-                    HealthBar.Size = Vector2.new(barWidth, barHeight * healthPercent)
-                    HealthBar.Position = Vector2.new(boxPos.X - barWidth - 4, boxPos.Y + (barHeight * (1 - healthPercent)))
+                    HealthBar.Size = Vector2.new(3, sizeY * healthPercent)
+                    HealthBar.Position = Vector2.new(boxPos.X - 6, boxPos.Y + (sizeY * (1 - healthPercent)))
                     HealthBar.Color = Color3.fromHSV(healthPercent * 0.3, 1, 1)
                     HealthBar.Visible = true
+
+                    -- [ 2. 骨架更新邏輯 ]
+                    local parts = (hum.RigType == Enum.HumanoidRigType.R15) and BodyParts or BodyPartsR6
+                    for i, pair in pairs(parts) do
+                        local p1 = char:FindFirstChild(pair[1])
+                        local p2 = char:FindFirstChild(pair[2])
+                        if p1 and p2 and Skeleton[i] then
+                            local pos1, vis1 = Camera:WorldToViewportPoint(p1.Position)
+                            local pos2, vis2 = Camera:WorldToViewportPoint(p2.Position)
+                            if vis1 and vis2 then
+                                Skeleton[i].From = Vector2.new(pos1.X, pos1.Y)
+                                Skeleton[i].To = Vector2.new(pos2.X, pos2.Y)
+                                Skeleton[i].Visible = true
+                            else
+                                Skeleton[i].Visible = false
+                            end
+                        end
+                    end
                 else
                     Box.Visible = false
                     HealthBarOutline.Visible = false
                     HealthBar.Visible = false
+                    for _, l in pairs(Skeleton) do l.Visible = false end
                 end
             else
+                -- 隱藏所有
                 Box.Visible = false
                 HealthBarOutline.Visible = false
                 HealthBar.Visible = false
+                for _, l in pairs(Skeleton) do l.Visible = false end
+                
                 if not player.Parent then
                     Box:Remove()
                     HealthBarOutline:Remove()
                     HealthBar:Remove()
+                    for _, l in pairs(Skeleton) do l:Remove() end
                     connection:Disconnect()
                 end
             end
@@ -176,7 +208,7 @@ UIListLayout.Padding = UDim.new(0, 8)
 local function CreateButton(text, key)
     local BtnFrame = Instance.new("TextButton", Container)
     BtnFrame.Size = UDim2.new(1, 0, 0, 40)
-    BtnFrame.BackgroundColor3 = Settings[key] and Color3.fromRGB(50, 180, 100) or Color3.fromRGB(45, 45, 45)
+    BtnFrame.BackgroundColor3 = Settings[key] and Color3.fromRGB(20, 20, 30) or Color3.fromRGB(45, 45, 45)
     BtnFrame.Text = ""
     Instance.new("UICorner", BtnFrame).CornerRadius = UDim.new(0, 6)
     
