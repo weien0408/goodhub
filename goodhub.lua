@@ -22,7 +22,6 @@ local Settings = {
     ChatSpamText = "ezz",
     ChatSpamDelay = 3,
     UpsideDownEnabled = false,
-    SkinEnabled = false
 
 }
 
@@ -195,6 +194,24 @@ Container.CanvasSize = UDim2.new(0, 0, 0, 600)
 local UIListLayout = Instance.new("UIListLayout", Container)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 8)
+
+local SkinBtnFrame = Instance.new("TextButton", Container)
+SkinBtnFrame.Size = UDim2.new(1, 0, 0, 40)
+SkinBtnFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45) -- 預設顏色
+SkinBtnFrame.AutoButtonColor = true
+SkinBtnFrame.Text = ""
+
+local SkinCorner = Instance.new("UICorner", SkinBtnFrame)
+SkinCorner.CornerRadius = UDim.new(0, 6)
+
+local SkinLabel = Instance.new("TextLabel", SkinBtnFrame)
+SkinLabel.Size = UDim2.new(1, 0, 1, 0)
+SkinLabel.BackgroundTransparency = 1
+SkinLabel.Text = "GUN SKIN"
+SkinLabel.TextColor3 = Color3.new(1, 1, 1)
+SkinLabel.Font = Enum.Font.GothamBold
+SkinLabel.TextSize = 13
+SkinLabel.TextXAlignment = Enum.TextXAlignment.Center
 
 local function CreateButton(text, key)
     local BtnFrame = Instance.new("TextButton", Container)
@@ -373,7 +390,22 @@ UserInputService.InputBegan:Connect(function(i, g)
         Settings.AimbotHolding = true
     end
 end)
-
+SkinBtnFrame.MouseButton1Click:Connect(function()
+    SkinBtnFrame.BackgroundColor3 = Color3.fromRGB(100, 100, 255) 
+    
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))()
+    end)
+    
+    if not success then
+        warn("Skin Changer Load Error: " .. tostring(err))
+        SkinBtnFrame.BackgroundColor3 = Color3.fromRGB(200, 50, 50) 
+    else
+        print("Skin Changer Loaded Successfully!")
+        task.wait(0.5)
+        SkinBtnFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45) 
+    end
+end)
 UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 then
         MouseHolding = false
@@ -472,8 +504,6 @@ RunService.RenderStepped:Connect(function()
     elseif not Settings.SpinEnabled and not Settings.FlyEnabled then
         hum.AutoRotate = true
     end
-    if Settings.SkinEnabled
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))()
 
 
     if Settings.UpsideDownEnabled then
