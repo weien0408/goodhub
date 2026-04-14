@@ -149,7 +149,7 @@ local function CreateESP(player)
                     for _, l in pairs(Skeleton) do l.Visible = false end
                 end
             else
-                -- 隱藏所有
+  
                 Box.Visible = false
                 HealthBarOutline.Visible = false
                 HealthBar.Visible = false
@@ -171,7 +171,7 @@ end
 for _, v in pairs(Players:GetPlayers()) do if v ~= LocalPlayer then CreateESP(v) end end
 Players.PlayerAdded:Connect(CreateESP)
 
--- [UI Setup]
+
 local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 ScreenGui.Name = "YUNUKE_V2_UI"
 
@@ -399,7 +399,7 @@ RunService.RenderStepped:Connect(function()
         hum:ChangeState(Enum.HumanoidStateType.Physics)
         root.Velocity = Vector3.new(0, 0, 0)
         
-        local dt = task.wait() -
+        local dt = task.wait() 
         local dir = Vector3.new(0, 0, 0)
         if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + Camera.CFrame.LookVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - Camera.CFrame.LookVector end
@@ -412,10 +412,15 @@ RunService.RenderStepped:Connect(function()
             root.CFrame = root.CFrame + (dir.Unit * Settings.FlySpeed * dt)
         end
     else
-        if hum.FloorMaterial ~= Enum.Material.Air then
+
+        if hum:GetState() == Enum.HumanoidStateType.Physics then
             hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+          
+            root.Velocity = Vector3.new(0, 0, 0)
+            root.RotVelocity = Vector3.new(0, 0, 0)
         end
     end
+
     if Settings.SpinEnabled and not (Settings.AimbotHolding or (Settings.SilentAimEnabled and MouseHolding)) then
         hum.AutoRotate = false root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(Settings.SpinSpeed / 10), 0)
     elseif not Settings.SpinEnabled and not Settings.FlyEnabled then hum.AutoRotate = true end
