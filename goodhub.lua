@@ -306,7 +306,7 @@ CreateButton("FlY", "FlyEnabled")
 CreateButton("Noclip", "NoclipEnabled")
 CreateButton("Spin Bot", "SpinEnabled")
 CreateButton("Upside Down", "UpsideDownEnabled") 
-CreateButton("（NEW）Function", "unknown")
+CreateButton("SKIN", "loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))()")
 CreateButton("GOODHUB", "unknown")
 
 CreateSlider("Spin Speed", 3000, "SpinSpeed")
