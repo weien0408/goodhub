@@ -300,13 +300,13 @@ end
 
 CreateButton("Aimbot", "AimbotEnabled")
 CreateButton("Auto Aimbot", "SilentAimEnabled") 
-CreateButton("Auto Fire (Legit)", "AutoFireEnabled")
-CreateButton("Visual ESP", "ESPEnabled")
-CreateButton("Flight Mode", "FlyEnabled")
-CreateButton("Noclip (Wall)", "NoclipEnabled")
+CreateButton("Auto Fire", "AutoFireEnabled")
+CreateButton("ESP", "ESPEnabled")
+CreateButton("FlY", "FlyEnabled")
+CreateButton("Noclip", "NoclipEnabled")
 CreateButton("Spin Bot", "SpinEnabled")
 CreateButton("Upside Down", "UpsideDownEnabled") 
-CreateButton("unknown", "unknown")
+CreateButton("（NEW）Function", "unknown")
 
 CreateSlider("Spin Speed", 3000, "SpinSpeed")
 CreateSlider("Flight Speed", 1000, "FlySpeed")
