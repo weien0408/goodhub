@@ -307,6 +307,7 @@ CreateButton("Noclip", "NoclipEnabled")
 CreateButton("Spin Bot", "SpinEnabled")
 CreateButton("Upside Down", "UpsideDownEnabled") 
 CreateButton("（NEW）Function", "unknown")
+CreateButton("GOODHUB", "unknown")
 
 CreateSlider("Spin Speed", 3000, "SpinSpeed")
 CreateSlider("Flight Speed", 1000, "FlySpeed")
