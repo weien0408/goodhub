@@ -65,12 +65,12 @@ local function GetRoot(char) return char and char:FindFirstChild("HumanoidRootPa
 
 
 local function CreateESP(player)
-    -- 原有的方塊與血條
+
     local Box = Drawing.new("Square")
     local HealthBarOutline = Drawing.new("Square")
     local HealthBar = Drawing.new("Square")
     
-    -- 骨架線段容器
+
     local Skeleton = {}
     local BodyParts = {
         {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"}, -- 軀幹
@@ -79,7 +79,7 @@ local function CreateESP(player)
         {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"}, -- 左腳
         {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"} -- 右腳
     }
-    -- 針對 R6 兼容處理 (如果不是 R15)
+
     local BodyPartsR6 = {
         {"Head", "Torso"}, {"Torso", "Left Arm"}, {"Torso", "Right Arm"},
         {"Torso", "Left Leg"}, {"Torso", "Right Leg"}
@@ -95,7 +95,7 @@ local function CreateESP(player)
             table.insert(Skeleton, line)
         end
     end
-    CreateLines(15) -- 預建足夠的線段
+    CreateLines(15) 
 
     local function Update()
         local connection
@@ -107,7 +107,7 @@ local function CreateESP(player)
                 local position, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
                 
                 if onScreen then
-                    -- [ 1. 原有的方塊與血條更新 ]
+ 
                     local sizeX = 2200 / position.Z
                     local sizeY = 3200 / position.Z
                     local boxPos = Vector2.new(position.X - sizeX / 2, position.Y - sizeY / 2)
@@ -125,7 +125,7 @@ local function CreateESP(player)
                     HealthBar.Color = Color3.fromHSV(healthPercent * 0.3, 1, 1)
                     HealthBar.Visible = true
 
-                    -- [ 2. 骨架更新邏輯 ]
+    
                     local parts = (hum.RigType == Enum.HumanoidRigType.R15) and BodyParts or BodyPartsR6
                     for i, pair in pairs(parts) do
                         local p1 = char:FindFirstChild(pair[1])
