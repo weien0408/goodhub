@@ -1,3 +1,4 @@
+-- https://discord.gg/dBF9H8c3w2
 repeat wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
