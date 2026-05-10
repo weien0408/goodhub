@@ -46,7 +46,6 @@ local Settings = {
     WalkSpeedEnabled = false,
     WalkSpeedValue = 100,
     InfiniteJumpEnabled = false,
-    -- 功能開關
     StickToHeadEnabled = false 
 }
 
