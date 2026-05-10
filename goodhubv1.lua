@@ -2,7 +2,7 @@
 repeat wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local FileName = "YUNUKE_CONFIG_V2.json"
+local FileName = "YUNUKE_CONFIG_FINAL.json" 
 
 local Settings = {
     AimbotEnabled = false,
@@ -18,6 +18,7 @@ local Settings = {
     SpinEnabled = false,
     SpinSpeed = 800,
     DanceEnabled = false,
+    DanceID = "131758838511368", 
     ESPEnabled = false,
     IsBinding = false,
     ChatSpamEnabled = false,
@@ -39,8 +40,12 @@ local Settings = {
     IsBindingHide = false,
     ControllerSpoofEnabled = false,
     VrSpoofEnabled = false,
-    RainEnabled = false,
-    FPSBoostEnabled = false 
+    FPSBoostEnabled = false,
+    DarkMapEnabled = false,
+    Resolution43Enabled = false,
+    WalkSpeedEnabled = false,
+    WalkSpeedValue = 100,
+    InfiniteJumpEnabled = false
 }
 
 local function SaveSettings()
@@ -63,7 +68,7 @@ local function LoadSettings()
                     end 
                 end
             else
-                warn("設定檔格式錯誤，已載入預設值")
+                warn("Config format error, loaded defaults.")
             end
         end
     end
@@ -79,9 +84,51 @@ local Lighting = game:GetService("Lighting")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 local lastAutoFireTime = 0
-local lastChatTime = 0
 
--- [邏輯保持原樣]
+local DarkMapConnection = nil
+local OriginalColors = {}
+
+local function ApplyDarkMap(state)
+    local darkColor = Color3.fromRGB(30, 35, 38)
+    local targetColor = Color3.fromRGB(151, 153, 163)
+    
+    local function isColorClose(c1, c2, threshold)
+        threshold = (threshold or 10) / 255
+        return math.abs(c1.R - c2.R) < threshold and
+               math.abs(c1.G - c2.G) < threshold and
+               math.abs(c1.B - c2.B) < threshold
+    end
+
+    if state then
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if (v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation")) and isColorClose(v.Color, targetColor) then
+                OriginalColors[v] = v.Color
+                v.Color = darkColor
+            end
+        end
+
+        DarkMapConnection = workspace.DescendantAdded:Connect(function(desc)
+            if (desc:IsA("Part") or desc:IsA("MeshPart") or desc:IsA("UnionOperation")) then
+                if isColorClose(desc.Color, targetColor) then
+                    OriginalColors[desc] = desc.Color
+                    desc.Color = darkColor
+                end
+            end
+        end)
+    else
+        if DarkMapConnection then
+            DarkMapConnection:Disconnect()
+            DarkMapConnection = nil
+        end
+        for part, origColor in pairs(OriginalColors) do
+            if part and part.Parent then
+                part.Color = origColor
+            end
+        end
+        table.clear(OriginalColors)
+    end
+end
+
 local function ApplyFPSBoost(state)
     if state then
         settings().Rendering.QualityLevel = 1
@@ -138,33 +185,8 @@ local function ApplyVRSpoof(state)
     end
 end
 
-local RainEmitter = nil
-local RainAttachment = nil
-local function UpdateRain()
-    if Settings.RainEnabled and LocalPlayer.Character then
-        local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            if not RainEmitter then
-                RainAttachment = Instance.new("Attachment", root)
-                RainAttachment.Position = Vector3.new(0, 20, 0)
-                RainEmitter = Instance.new("ParticleEmitter", RainAttachment)
-                RainEmitter.Texture = "rbxassetid://133539157"
-                RainEmitter.Size = NumberSequence.new(0.5)
-                RainEmitter.Acceleration = Vector3.new(0, -100, 0)
-                RainEmitter.Lifetime = NumberRange.new(1, 1.5)
-                RainEmitter.Rate = 1000
-                RainEmitter.Speed = NumberRange.new(50, 80)
-                RainEmitter.Transparency = NumberSequence.new(0.6)
-            end
-            RainEmitter.Enabled = true
-        end
-    elseif RainEmitter then
-        RainEmitter.Enabled = false
-    end
-end
-
 local danceAnim = Instance.new("Animation")
-danceAnim.AnimationId = "rbxassetid://507771019"
+danceAnim.AnimationId = "rbxassetid://" .. Settings.DanceID
 local currentDanceTrack = nil
 local loadedDanceChar = nil
 
@@ -230,18 +252,14 @@ end
 for _, v in pairs(Players:GetPlayers()) do if v ~= LocalPlayer then CreateESP(v) end end
 Players.PlayerAdded:Connect(CreateESP)
 
-
-
 local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-ScreenGui.Name = "YUNUKE_PIXEL_V2"
+ScreenGui.Name = "YUNUKE_PIXEL_FINAL"
 ScreenGui.ResetOnSpawn = false
-
 
 local TintGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 TintGui.DisplayOrder = -1
 local TintFrame = Instance.new("Frame", TintGui)
 TintFrame.Size, TintFrame.BackgroundTransparency, TintFrame.BorderSizePixel, TintFrame.Visible = UDim2.new(1, 0, 1, 0), 0.7, 0, false
-
 
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 420, 0, 320)
@@ -264,7 +282,6 @@ Title.Font = Enum.Font.Code
 Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
-
 local TabHolder = Instance.new("Frame", MainFrame)
 TabHolder.Size = UDim2.new(0, 100, 1, -45)
 TabHolder.Position = UDim2.new(0, 5, 0, 40)
@@ -274,7 +291,6 @@ TabHolder.BorderColor3 = Color3.fromRGB(60, 60, 60)
 
 local TabListLayout = Instance.new("UIListLayout", TabHolder)
 TabListLayout.Padding = UDim.new(0, 2)
-
 
 local ContentHolder = Instance.new("Frame", MainFrame)
 ContentHolder.Size = UDim2.new(1, -115, 1, -45)
@@ -314,7 +330,6 @@ local function CreatePage(name)
     end)
     return Page
 end
-
 
 local function AddToggle(parent, text, key, callback)
     local Btn = Instance.new("TextButton", parent)
@@ -392,7 +407,6 @@ local function AddSlider(parent, text, max, key)
     parent.CanvasSize = UDim2.new(0, 0, 0, parent.UIListLayout.AbsoluteContentSize.Y)
 end
 
-
 local CombatPage = CreatePage("Combat")
 local VisualPage = CreatePage("Visual")
 local MovePage = CreatePage("Move")
@@ -403,11 +417,12 @@ AddToggle(CombatPage, "Auto Aimbot", "SilentAimEnabled")
 AddToggle(CombatPage, "Auto Fire", "AutoFireEnabled")
 
 AddToggle(VisualPage, "ESP", "ESPEnabled")
+AddToggle(VisualPage, "Dark Map", "DarkMapEnabled", function(v) ApplyDarkMap(v) end)
 AddToggle(VisualPage, "Night Mode", "NightModeEnabled")
+AddToggle(VisualPage, "4:3 Resolution", "Resolution43Enabled")
 AddToggle(VisualPage, "Crosshair", "CrosshairEnabled")
 AddToggle(VisualPage, "FOV Circle", "FOVEnabled")
 AddToggle(VisualPage, "Screen Color Tint", "ScreenColorEnabled")
-AddToggle(VisualPage, "Rain Effect", "RainEnabled")
 AddSlider(VisualPage, "Crosshair Size", 50, "CrosshairSize")
 AddSlider(VisualPage, "Crosshair Gap", 30, "CrosshairGap")
 AddSlider(VisualPage, "FOV Radius", 800, "FOVRadius")
@@ -418,16 +433,36 @@ AddToggle(MovePage, "Spin Bot", "SpinEnabled")
 AddToggle(MovePage, "Upside Down", "UpsideDownEnabled")
 AddSlider(MovePage, "Spin Speed", 3000, "SpinSpeed")
 AddSlider(MovePage, "Flight Speed", 1000, "FlySpeed")
+AddToggle(MovePage, "Walk Speed", "WalkSpeedEnabled")
+AddSlider(MovePage, "Speed Value", 500, "WalkSpeedValue")
+AddToggle(MovePage, "Infinite Jump", "InfiniteJumpEnabled")
 
 AddToggle(MiscPage, "FPS Boost", "FPSBoostEnabled", function(v) ApplyFPSBoost(v) end)
 AddToggle(MiscPage, "Gamepad Spoof", "ControllerSpoofEnabled", function(v) ApplyControllerSpoof(v) end)
 AddToggle(MiscPage, "VR Spoof", "VRSpoofEnabled", function(v) ApplyVRSpoof(v) end)
 AddToggle(MiscPage, "Dance", "DanceEnabled")
 
+local DanceIDBox = Instance.new("TextBox", MiscPage)
+DanceIDBox.Size = UDim2.new(1, -5, 0, 30)
+DanceIDBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+DanceIDBox.PlaceholderText = "Input Dance ID & Enter..."
+DanceIDBox.Text = Settings.DanceID
+DanceIDBox.TextColor3 = Color3.new(1, 1, 1)
+DanceIDBox.Font = Enum.Font.Code
+DanceIDBox.TextSize = 13
+DanceIDBox.FocusLost:Connect(function(enter)
+    if enter then
+        Settings.DanceID = DanceIDBox.Text
+        SaveSettings()
+        danceAnim.AnimationId = "rbxassetid://" .. Settings.DanceID
+        if currentDanceTrack then currentDanceTrack:Stop() currentDanceTrack = nil end
+        loadedDanceChar = nil
+    end
+end)
 
 local SkinBtn = Instance.new("TextButton", MiscPage)
 SkinBtn.Size, SkinBtn.BackgroundColor3, SkinBtn.Text, SkinBtn.Font, SkinBtn.TextColor3, SkinBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(40, 40, 80), "LOAD GUN SKIN", Enum.Font.Code, Color3.new(1, 1, 1), 13
-SkinBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))() end)
+SkinBtn.MouseButton1Click:Connect(function() task.spawn(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))() end) end)
 
 local BindBtn = Instance.new("TextButton", MiscPage)
 BindBtn.Size, BindBtn.BackgroundColor3, BindBtn.Text, BindBtn.Font, BindBtn.TextColor3, BindBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(45, 45, 45), "AIM KEY: ["..Settings.AimbotKey.."]", Enum.Font.Code, Color3.new(1, 1, 1), 13
@@ -438,7 +473,6 @@ HideBtn.Size, HideBtn.BackgroundColor3, HideBtn.Text, HideBtn.Font, HideBtn.Text
 HideBtn.MouseButton1Click:Connect(function() Settings.IsBindingHide = true HideBtn.Text = "... PRESS ANY KEY ..." end)
 
 Pages["Combat"].Visible = true 
-
 
 local draggingUI, dragStartUI, startPosUI
 Header.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingUI = true dragStartUI = input.Position startPosUI = MainFrame.Position end end)
@@ -461,6 +495,12 @@ UserInputService.InputBegan:Connect(function(i, g)
 end)
 UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then MouseHolding = false end if i.KeyCode.Name == Settings.AimbotKey or i.UserInputType.Name == Settings.AimbotKey then Settings.AimbotHolding = false end end)
 
+UserInputService.JumpRequest:Connect(function()
+    if Settings.InfiniteJumpEnabled and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
 
 local crosshairLines = {}
 for i = 1, 4 do local line = Drawing.new("Line") line.Visible, line.Color, line.Thickness = false, Color3.fromRGB(15, 30, 150), 2.5 table.insert(crosshairLines, line) end
@@ -486,20 +526,28 @@ local function GetClosestTarget()
     return target
 end
 
-RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", 201, function()
+RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", 201, function() 
     if (Settings.AimbotEnabled and Settings.AimbotHolding) or (Settings.SilentAimEnabled and MouseHolding) then
         local target = GetClosestTarget()
         if target then
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
             local root = GetRoot(LocalPlayer.Character)
-            if root then root.CFrame = CFrame.new(root.Position, Vector3.new(target.Position.X, root.Position.Y, target.Position.Z)) end
-            if Settings.AutoFireEnabled and tick() - lastAutoFireTime >= Settings.AutoFireDelay then if mouse1click then mouse1click() end lastAutoFireTime = tick() end
+            if root then 
+                root.CFrame = CFrame.new(root.Position, Vector3.new(target.Position.X, root.Position.Y, target.Position.Z)) 
+            end
+            if Settings.AutoFireEnabled and tick() - lastAutoFireTime >= Settings.AutoFireDelay then 
+                if mouse1click then mouse1click() end 
+                lastAutoFireTime = tick() 
+            end
         end
+    end
+
+    if Settings.Resolution43Enabled then
+        Camera.CFrame = Camera.CFrame * CFrame.new(0, 0, 0, 1, 0, 0, 0, 0.75, 0, 0, 0, 0.75)
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    UpdateRain()
     if Settings.ScreenColorEnabled then TintFrame.BackgroundColor3, TintFrame.Visible = Color3.fromRGB(Settings.ScreenColorR, Settings.ScreenColorG, Settings.ScreenColorB), true else TintFrame.Visible = false end
     Lighting.ClockTime = Settings.NightModeEnabled and 0 or 14
     local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -518,6 +566,8 @@ RunService.RenderStepped:Connect(function()
     local root = GetRoot(char)
     local hum = char and char:FindFirstChild("Humanoid")
     if not root or not hum then return end
+
+    if Settings.WalkSpeedEnabled then hum.WalkSpeed = Settings.WalkSpeedValue end
 
     if Settings.DanceEnabled then
         if loadedDanceChar ~= char then
