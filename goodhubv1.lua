@@ -2,23 +2,23 @@
 repeat wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local FileName = "YUNUKE_CONFIG_FINAL.json" 
+local FileName = "YUNUKE_CONFIG_FINAL.json"
 
 local Settings = {
     AimbotEnabled = false,
-    SilentAimEnabled = false, 
+    SilentAimEnabled = false,
     AimbotKey = "B",
     AimbotPart = "Head",
     AimbotHolding = false,
     AutoFireEnabled = false,
-    AutoFireDelay = 0.05, 
+    AutoFireDelay = 0.05,
     FlyEnabled = false,
     FlySpeed = 200,
     NoclipEnabled = false,
     SpinEnabled = false,
     SpinSpeed = 800,
     DanceEnabled = false,
-    DanceID = "131758838511368", 
+    DanceID = "131758838511368",
     ESPEnabled = false,
     IsBinding = false,
     ChatSpamEnabled = false,
@@ -27,8 +27,8 @@ local Settings = {
     UpsideDownEnabled = false,
     NightModeEnabled = false,
     CrosshairEnabled = false,
-    CrosshairSize = 12, 
-    CrosshairGap = 8,   
+    CrosshairSize = 12,
+    CrosshairGap = 8,
     CrosshairSpinSpeed = 150,
     FOVEnabled = false,
     FOVRadius = 150,
@@ -36,7 +36,7 @@ local Settings = {
     ScreenColorR = 255,
     ScreenColorG = 0,
     ScreenColorB = 0,
-    HideKey = "RightShift", 
+    HideKey = "RightShift",
     IsBindingHide = false,
     ControllerSpoofEnabled = false,
     VrSpoofEnabled = false,
@@ -45,7 +45,9 @@ local Settings = {
     Resolution43Enabled = false,
     WalkSpeedEnabled = false,
     WalkSpeedValue = 100,
-    InfiniteJumpEnabled = false
+    InfiniteJumpEnabled = false,
+    -- 功能開關
+    StickToHeadEnabled = false 
 }
 
 local function SaveSettings()
@@ -58,14 +60,14 @@ local function LoadSettings()
         local success, content = pcall(function() return readfile(FileName) end)
         if success and content ~= "" then
             local decode_success, decoded = pcall(function() 
-                return HttpService:JSONDecode(content) 
+                return HttpService:JSONDecode(content)
             end)
             
             if decode_success and type(decoded) == "table" then
-                for k, v in pairs(decoded) do 
-                    if Settings[k] ~= nil then 
-                        Settings[k] = v 
-                    end 
+                for k, v in pairs(decoded) do
+                    if Settings[k] ~= nil then
+                        Settings[k] = v
+                    end
                 end
             else
                 warn("Config format error, loaded defaults.")
@@ -191,7 +193,29 @@ local currentDanceTrack = nil
 local loadedDanceChar = nil
 
 local function GetRoot(char) 
-    return char and char:FindFirstChild("HumanoidRootPart") 
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+
+local function GetNearestPlayer(maxDist)
+    local target = nil
+    local dist = maxDist or math.huge
+    local myRoot = GetRoot(LocalPlayer.Character)
+    if not myRoot then return nil end
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+            local hum = p.Character:FindFirstChild("Humanoid")
+            if hum and hum.Health > 0 then
+                local d = (myRoot.Position - p.Character.Head.Position).Magnitude
+                if d < dist then
+                    dist = d
+                    target = p
+                end
+            end
+        end
+    end
+    return target
 end
 
 local function CreateESP(player)
@@ -225,6 +249,7 @@ local function CreateESP(player)
                     HealthBarOutline.Size, HealthBarOutline.Position, HealthBarOutline.Visible = Vector2.new(5, sizeY + 2), Vector2.new(boxPos.X - 7, boxPos.Y - 1), true
                     HealthBar.Size, HealthBar.Position, HealthBar.Color, HealthBar.Visible = Vector2.new(3, sizeY * healthPercent), Vector2.new(boxPos.X - 6, boxPos.Y + (sizeY * (1 - healthPercent))), Color3.fromHSV(healthPercent * 0.3, 1, 1), true
                     local parts = (hum.RigType == Enum.HumanoidRigType.R15) and BodyParts or BodyPartsR6
+    
                     for i, pair in pairs(parts) do
                         local p1, p2 = char:FindFirstChild(pair[1]), char:FindFirstChild(pair[2])
                         if p1 and p2 and Skeleton[i] then
@@ -427,6 +452,7 @@ AddSlider(VisualPage, "Crosshair Size", 50, "CrosshairSize")
 AddSlider(VisualPage, "Crosshair Gap", 30, "CrosshairGap")
 AddSlider(VisualPage, "FOV Radius", 800, "FOVRadius")
 
+AddToggle(MovePage, "Stick To Head (Loop)", "StickToHeadEnabled") 
 AddToggle(MovePage, "Fly", "FlyEnabled")
 AddToggle(MovePage, "Noclip", "NoclipEnabled")
 AddToggle(MovePage, "Spin Bot", "SpinEnabled")
@@ -472,7 +498,7 @@ local HideBtn = Instance.new("TextButton", MiscPage)
 HideBtn.Size, HideBtn.BackgroundColor3, HideBtn.Text, HideBtn.Font, HideBtn.TextColor3, HideBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(45, 45, 45), "HIDE KEY: ["..Settings.HideKey.."]", Enum.Font.Code, Color3.new(1, 1, 1), 13
 HideBtn.MouseButton1Click:Connect(function() Settings.IsBindingHide = true HideBtn.Text = "... PRESS ANY KEY ..." end)
 
-Pages["Combat"].Visible = true 
+Pages["Combat"].Visible = true
 
 local draggingUI, dragStartUI, startPosUI
 Header.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingUI = true dragStartUI = input.Position startPosUI = MainFrame.Position end end)
@@ -533,11 +559,11 @@ RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", 201, function()
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
             local root = GetRoot(LocalPlayer.Character)
             if root then 
-                root.CFrame = CFrame.new(root.Position, Vector3.new(target.Position.X, root.Position.Y, target.Position.Z)) 
+                root.CFrame = CFrame.new(root.Position, Vector3.new(target.Position.X, root.Position.Y, target.Position.Z))
             end
-            if Settings.AutoFireEnabled and tick() - lastAutoFireTime >= Settings.AutoFireDelay then 
-                if mouse1click then mouse1click() end 
-                lastAutoFireTime = tick() 
+            if Settings.AutoFireEnabled and tick() - lastAutoFireTime >= Settings.AutoFireDelay then
+                if mouse1click then mouse1click() end
+                lastAutoFireTime = tick()
             end
         end
     end
@@ -567,6 +593,15 @@ RunService.RenderStepped:Connect(function()
     local hum = char and char:FindFirstChild("Humanoid")
     if not root or not hum then return end
 
+
+    if Settings.StickToHeadEnabled then
+        local targetPlayer = GetNearestPlayer(150) 
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
+            root.CFrame = targetPlayer.Character.Head.CFrame * CFrame.new(0, 3.2, 0)
+            root.Velocity = Vector3.zero
+        end
+    end
+
     if Settings.WalkSpeedEnabled then hum.WalkSpeed = Settings.WalkSpeedValue end
 
     if Settings.DanceEnabled then
@@ -578,7 +613,7 @@ RunService.RenderStepped:Connect(function()
         elseif currentDanceTrack and not currentDanceTrack.IsPlaying then currentDanceTrack:Play() end
     elseif currentDanceTrack and currentDanceTrack.IsPlaying then currentDanceTrack:Stop() end
 
-    if Settings.FlyEnabled then
+    if Settings.FlyEnabled and not Settings.StickToHeadEnabled then
         hum:ChangeState(11) root.Velocity = Vector3.zero
         local dt = task.wait() local dir = Vector3.zero
         if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir += Camera.CFrame.LookVector end
@@ -596,4 +631,10 @@ RunService.RenderStepped:Connect(function()
     if Settings.UpsideDownEnabled then root.CFrame *= CFrame.Angles(0, 0, math.rad(180)) end
 end)
 
-RunService.Stepped:Connect(function() if Settings.NoclipEnabled and LocalPlayer.Character then for _, p in pairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end)
+RunService.Stepped:Connect(function() 
+    if (Settings.NoclipEnabled or Settings.StickToHeadEnabled) and LocalPlayer.Character then
+        for _, p in pairs(LocalPlayer.Character:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = false end
+        end 
+    end 
+end)
