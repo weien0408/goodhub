@@ -487,7 +487,7 @@ end)
 
 local SkinBtn = Instance.new("TextButton", MiscPage)
 SkinBtn.Size, SkinBtn.BackgroundColor3, SkinBtn.Text, SkinBtn.Font, SkinBtn.TextColor3, SkinBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(40, 40, 80), "LOAD GUN SKIN", Enum.Font.Code, Color3.new(1, 1, 1), 13
-SkinBtn.MouseButton1Click:Connect(function() task.spawn(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))() end) end)
+SkinBtn.MouseButton1Click:Connect(function() task.spawn(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/weien0408/key/refs/heads/main/Skin.lua",true))() end) end)
 
 local BindBtn = Instance.new("TextButton", MiscPage)
 BindBtn.Size, BindBtn.BackgroundColor3, BindBtn.Text, BindBtn.Font, BindBtn.TextColor3, BindBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(45, 45, 45), "AIM KEY: ["..Settings.AimbotKey.."]", Enum.Font.Code, Color3.new(1, 1, 1), 13
