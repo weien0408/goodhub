@@ -1,7 +1,3 @@
--- GOOD HUB 
-[cite_start]-- 原始邏輯來自 message-4.txt [cite: 1-56]
--- 僅縮小 GUI 並新增 OPEN 按鈕
-
 repeat wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
@@ -24,9 +20,6 @@ local Settings = {
     DanceID = "131758838511368",
     ESPEnabled = false,
     IsBinding = false,
-    ChatSpamEnabled = false,
-    ChatSpamText = "ezz",
-    ChatSpamDelay = 3,
     UpsideDownEnabled = false,
     NightModeEnabled = false,
     CrosshairEnabled = false,
@@ -74,7 +67,6 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
@@ -123,13 +115,15 @@ local function ApplyFPSBoost(state)
 end
 
 local function ApplyControllerSpoof(state)
-    if state then pcall(function() local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls") remote:FireServer("MouseKeyboard") task.wait(0.3) remote:FireServer("Gamepad") end)
-    else pcall(function() local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls") remote:FireServer("MouseKeyboard") end) end
+    local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls")
+    if state then pcall(function() remote:FireServer("MouseKeyboard") task.wait(0.3) remote:FireServer("Gamepad") end)
+    else pcall(function() remote:FireServer("MouseKeyboard") end) end
 end
 
 local function ApplyVRSpoof(state)
-    if state then pcall(function() local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls") remote:FireServer("MouseKeyboard") task.wait(0.3) remote:FireServer("VR") end)
-    else pcall(function() local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls") remote:FireServer("MouseKeyboard") end) end
+    local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls")
+    if state then pcall(function() remote:FireServer("MouseKeyboard") task.wait(0.3) remote:FireServer("VR") end)
+    else pcall(function() remote:FireServer("MouseKeyboard") end) end
 end
 
 local danceAnim = Instance.new("Animation")
@@ -183,22 +177,25 @@ local function CreateESP(player)
                         end
                     end
                 else Box.Visible, HealthBarOutline.Visible, HealthBar.Visible = false, false, false for _, l in pairs(Skeleton) do l.Visible = false end end
-            else Box.Visible, HealthBarOutline.Visible, HealthBar.Visible = false, false, false for _, l in pairs(Skeleton) do l.Visible = false end if not player.Parent then connection:Disconnect() Box:Remove() HealthBarOutline:Remove() HealthBar:Remove() for _, l in pairs(Skeleton) do l:Remove() end end end
+            else 
+                Box.Visible, HealthBarOutline.Visible, HealthBar.Visible = false, false, false for _, l in pairs(Skeleton) do l.Visible = false end
+                if not player.Parent then connection:Disconnect() Box:Remove() HealthBarOutline:Remove() HealthBar:Remove() for _, l in pairs(Skeleton) do l:Remove() end end 
+            end
         end)
     end
     coroutine.wrap(Update)()
 end
+
 for _, v in pairs(Players:GetPlayers()) do if v ~= LocalPlayer then CreateESP(v) end end
 Players.PlayerAdded:Connect(CreateESP)
 
 local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-ScreenGui.Name = "YUNUKE_PIXEL_FINAL"
-ScreenGui.ResetOnSpawn = false
+ScreenGui.Name, ScreenGui.ResetOnSpawn = "YUNUKE_PIXEL_FINAL", false
 
 local OpenBtn = Instance.new("TextButton", ScreenGui)
-OpenBtn.Size, OpenBtn.Position = UDim2.new(0, 50, 0, 25), UDim2.new(0, 10, 0.4, 0)
+OpenBtn.Size, OpenBtn.Position = UDim2.new(0, 55, 0, 25), UDim2.new(0, 10, 0.45, 0)
 OpenBtn.BackgroundColor3, OpenBtn.BorderSizePixel, OpenBtn.BorderColor3 = Color3.fromRGB(20, 20, 20), 2, Color3.fromRGB(255, 255, 255)
-OpenBtn.Text, OpenBtn.TextColor3, OpenBtn.Font, OpenBtn.TextSize = "OPEN", Color3.new(1, 1, 1), Enum.Font.Code, 12
+OpenBtn.Text, OpenBtn.TextColor3, OpenBtn.Font, OpenBtn.TextSize = "OPEN", Color3.new(1, 1, 1), Enum.Font.Code, 13
 
 local TintGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 TintGui.DisplayOrder = -1
@@ -206,21 +203,21 @@ local TintFrame = Instance.new("Frame", TintGui)
 TintFrame.Size, TintFrame.BackgroundTransparency, TintFrame.BorderSizePixel, TintFrame.Visible = UDim2.new(1, 0, 1, 0), 0.7, 0, false
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size, MainFrame.Position, MainFrame.BackgroundColor3, MainFrame.BorderSizePixel, MainFrame.BorderColor3, MainFrame.Visible = UDim2.new(0, 320, 0, 240), UDim2.new(0.5, -160, 0.5, -120), Color3.fromRGB(15, 15, 15), 2, Color3.fromRGB(255, 255, 255), false
+MainFrame.Size, MainFrame.Position, MainFrame.BackgroundColor3, MainFrame.BorderSizePixel, MainFrame.BorderColor3, MainFrame.Visible = UDim2.new(0, 420, 0, 320), UDim2.new(0.5, -210, 0.5, -160), Color3.fromRGB(15, 15, 15), 2, Color3.fromRGB(255, 255, 255), false
 
 OpenBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible OpenBtn.Text = MainFrame.Visible and "CLOSE" or "OPEN" end)
 
 local Header = Instance.new("Frame", MainFrame)
-Header.Size, Header.BackgroundColor3, Header.BorderSizePixel = UDim2.new(1, 0, 0, 25), Color3.fromRGB(255, 255, 255), 0
+Header.Size, Header.BackgroundColor3, Header.BorderSizePixel = UDim2.new(1, 0, 0, 35), Color3.fromRGB(255, 255, 255), 0
 local Title = Instance.new("TextLabel", Header)
-Title.Size, Title.Position, Title.BackgroundTransparency, Title.Text, Title.TextColor3, Title.Font, Title.TextSize, Title.TextXAlignment = UDim2.new(1, -10, 1, 0), UDim2.new(0, 10, 0, 0), 1, "GOOD HUB", Color3.fromRGB(0, 0, 0), Enum.Font.Code, 14, Enum.TextXAlignment.Left
+Title.Size, Title.Position, Title.BackgroundTransparency, Title.Text, Title.TextColor3, Title.Font, Title.TextSize, Title.TextXAlignment = UDim2.new(1, -10, 1, 0), UDim2.new(0, 10, 0, 0), 1, "GOOD HUB", Color3.fromRGB(0, 0, 0), Enum.Font.Code, 16, Enum.TextXAlignment.Left
 
 local TabHolder = Instance.new("Frame", MainFrame)
-TabHolder.Size, TabHolder.Position, TabHolder.BackgroundColor3, TabHolder.BorderSizePixel, TabHolder.BorderColor3 = UDim2.new(0, 80, 1, -35), UDim2.new(0, 5, 0, 30), Color3.fromRGB(25, 25, 25), 1, Color3.fromRGB(60, 60, 60)
+TabHolder.Size, TabHolder.Position, TabHolder.BackgroundColor3, TabHolder.BorderSizePixel, TabHolder.BorderColor3 = UDim2.new(0, 100, 1, -45), UDim2.new(0, 5, 0, 40), Color3.fromRGB(25, 25, 25), 1, Color3.fromRGB(60, 60, 60)
 Instance.new("UIListLayout", TabHolder).Padding = UDim.new(0, 2)
 
 local ContentHolder = Instance.new("Frame", MainFrame)
-ContentHolder.Size, ContentHolder.Position, ContentHolder.BackgroundTransparency = UDim2.new(1, -95, 1, -35), UDim2.new(0, 90, 0, 30), 1
+ContentHolder.Size, ContentHolder.Position, ContentHolder.BackgroundTransparency = UDim2.new(1, -115, 1, -45), UDim2.new(0, 110, 0, 40), 1
 
 local Pages = {}
 local function CreatePage(name)
@@ -228,29 +225,33 @@ local function CreatePage(name)
     Page.Size, Page.BackgroundTransparency, Page.Visible, Page.ScrollBarThickness, Page.CanvasSize, Page.BorderSizePixel = UDim2.new(1, 0, 1, 0), 1, false, 2, UDim2.new(0, 0, 0, 0), 0
     Instance.new("UIListLayout", Page).Padding, Pages[name] = UDim.new(0, 5), Page
     local TabBtn = Instance.new("TextButton", TabHolder)
-    TabBtn.Size, TabBtn.BackgroundColor3, TabBtn.BorderSizePixel, TabBtn.Text, TabBtn.TextColor3, TabBtn.Font, TabBtn.TextSize = UDim2.new(1, 0, 0, 25), Color3.fromRGB(35, 35, 35), 0, name:upper(), Color3.fromRGB(150, 150, 150), Enum.Font.Code, 12
-    TabBtn.MouseButton1Click:Connect(function() for _, p in pairs(Pages) do p.Visible = false end Page.Visible = true for _, b in pairs(TabHolder:GetChildren()) do if b:IsA("TextButton") then b.TextColor3, b.BackgroundColor3 = Color3.fromRGB(150, 150, 150), Color3.fromRGB(35, 35, 35) end end TabBtn.TextColor3, TabBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255), Color3.fromRGB(60, 60, 60) end)
+    TabBtn.Size, TabBtn.BackgroundColor3, TabBtn.BorderSizePixel, TabBtn.Text, TabBtn.TextColor3, TabBtn.Font, TabBtn.TextSize = UDim2.new(1, 0, 0, 30), Color3.fromRGB(35, 35, 35), 0, name:upper(), Color3.fromRGB(150, 150, 150), Enum.Font.Code, 14
+    TabBtn.MouseButton1Click:Connect(function() 
+        for _, p in pairs(Pages) do p.Visible = false end Page.Visible = true 
+        for _, b in pairs(TabHolder:GetChildren()) do if b:IsA("TextButton") then b.TextColor3, b.BackgroundColor3 = Color3.fromRGB(150, 150, 150), Color3.fromRGB(35, 35, 35) end end 
+        TabBtn.TextColor3, TabBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255), Color3.fromRGB(60, 60, 60)
+    end)
     return Page
 end
 
 local function AddToggle(parent, text, key, callback)
     local Btn = Instance.new("TextButton", parent)
-    Btn.Size, Btn.BackgroundColor3, Btn.BorderSizePixel, Btn.BorderColor3, Btn.Text = UDim2.new(1, -5, 0, 25), Color3.fromRGB(30, 30, 30), 1, Color3.fromRGB(60, 60, 60), ""
+    Btn.Size, Btn.BackgroundColor3, Btn.BorderSizePixel, Btn.BorderColor3, Btn.Text = UDim2.new(1, -5, 0, 30), Color3.fromRGB(30, 30, 30), 1, Color3.fromRGB(60, 60, 60), ""
     local L = Instance.new("TextLabel", Btn)
-    L.Size, L.Position, L.BackgroundTransparency, L.Text, L.TextColor3, L.Font, L.TextSize, L.TextXAlignment = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 0, 0), 1, text:upper(), Color3.fromRGB(200, 200, 200), Enum.Font.Code, 11, Enum.TextXAlignment.Left
+    L.Size, L.Position, L.BackgroundTransparency, L.Text, L.TextColor3, L.Font, L.TextSize, L.TextXAlignment = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 0, 0), 1, text:upper(), Color3.fromRGB(200, 200, 200), Enum.Font.Code, 13, Enum.TextXAlignment.Left
     local S = Instance.new("TextLabel", Btn)
-    S.Size, S.Position, S.BackgroundTransparency, S.Text, S.TextColor3, S.Font, S.TextSize = UDim2.new(0, 30, 1, 0), UDim2.new(1, -35, 0, 0), 1, Settings[key] and "[X]" or "[ ]", Settings[key] and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0), Enum.Font.Code, 12
+    S.Size, S.Position, S.BackgroundTransparency, S.Text, S.TextColor3, S.Font, S.TextSize = UDim2.new(0, 30, 1, 0), UDim2.new(1, -35, 0, 0), 1, Settings[key] and "[X]" or "[ ]", Settings[key] and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0), Enum.Font.Code, 14
     Btn.MouseButton1Click:Connect(function() Settings[key] = not Settings[key] SaveSettings() S.Text, S.TextColor3 = Settings[key] and "[X]" or "[ ]", Settings[key] and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0) if callback then callback(Settings[key]) end end)
     parent.CanvasSize = UDim2.new(0, 0, 0, parent.UIListLayout.AbsoluteContentSize.Y)
 end
 
 local function AddSlider(parent, text, max, key)
     local Frame = Instance.new("Frame", parent)
-    Frame.Size, Frame.BackgroundTransparency = UDim2.new(1, -5, 0, 35), 1
+    Frame.Size, Frame.BackgroundTransparency = UDim2.new(1, -5, 0, 45), 1
     local L = Instance.new("TextLabel", Frame)
-    L.Size, L.Text, L.TextColor3, L.Font, L.TextSize, L.BackgroundTransparency, L.TextXAlignment = UDim2.new(1, 0, 0, 15), text:upper() .. ": " .. Settings[key], Color3.fromRGB(200, 200, 200), Enum.Font.Code, 10, 1, Enum.TextXAlignment.Left
+    L.Size, L.Text, L.TextColor3, L.Font, L.TextSize, L.BackgroundTransparency, L.TextXAlignment = UDim2.new(1, 0, 0, 20), text:upper() .. ": " .. Settings[key], Color3.fromRGB(200, 200, 200), Enum.Font.Code, 12, 1, Enum.TextXAlignment.Left
     local Bar = Instance.new("TextButton", Frame)
-    Bar.Size, Bar.Position, Bar.BackgroundColor3, Bar.BorderSizePixel, Bar.Text = UDim2.new(1, 0, 0, 12), UDim2.new(0, 0, 0, 18), Color3.fromRGB(40, 40, 40), 1, ""
+    Bar.Size, Bar.Position, Bar.BackgroundColor3, Bar.BorderSizePixel, Bar.Text = UDim2.new(1, 0, 0, 15), UDim2.new(0, 0, 0, 22), Color3.fromRGB(40, 40, 40), 1, ""
     local Fill = Instance.new("Frame", Bar)
     Fill.Size, Fill.BackgroundColor3, Fill.BorderSizePixel = UDim2.new(Settings[key]/max, 0, 1, 0), Color3.fromRGB(255, 255, 255), 0
     local dragging = false
@@ -294,16 +295,19 @@ AddToggle(MiscPage, "VR Spoof", "VRSpoofEnabled", function(v) ApplyVRSpoof(v) en
 AddToggle(MiscPage, "Dance", "DanceEnabled")
 
 local DanceIDBox = Instance.new("TextBox", MiscPage)
-DanceIDBox.Size, DanceIDBox.BackgroundColor3, DanceIDBox.PlaceholderText, DanceIDBox.Text, DanceIDBox.TextColor3, DanceIDBox.Font, DanceIDBox.TextSize = UDim2.new(1, -5, 0, 25), Color3.fromRGB(30, 30, 30), "Input Dance ID & Enter...", Settings.DanceID, Color3.new(1, 1, 1), Enum.Font.Code, 12
+DanceIDBox.Size, DanceIDBox.BackgroundColor3, DanceIDBox.PlaceholderText, DanceIDBox.Text, DanceIDBox.TextColor3, DanceIDBox.Font, DanceIDBox.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(30, 30, 30), "Input Dance ID & Enter...", Settings.DanceID, Color3.new(1, 1, 1), Enum.Font.Code, 13
 DanceIDBox.FocusLost:Connect(function(enter) if enter then Settings.DanceID = DanceIDBox.Text SaveSettings() danceAnim.AnimationId = "rbxassetid://" .. Settings.DanceID if currentDanceTrack then currentDanceTrack:Stop() currentDanceTrack = nil end loadedDanceChar = nil end end)
+
 local SkinBtn = Instance.new("TextButton", MiscPage)
-SkinBtn.Size, SkinBtn.BackgroundColor3, SkinBtn.Text, SkinBtn.Font, SkinBtn.TextColor3, SkinBtn.TextSize = UDim2.new(1, -5, 0, 25), Color3.fromRGB(40, 40, 80), "LOAD GUN SKIN", Enum.Font.Code, Color3.new(1, 1, 1), 12
+SkinBtn.Size, SkinBtn.BackgroundColor3, SkinBtn.Text, SkinBtn.Font, SkinBtn.TextColor3, SkinBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(40, 40, 80), "LOAD GUN SKIN", Enum.Font.Code, Color3.new(1, 1, 1), 13
 SkinBtn.MouseButton1Click:Connect(function() task.spawn(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/endoverdosing/Soluna-API/refs/heads/main/skin-changer.lua",true))() end) end)
+
 local BindBtn = Instance.new("TextButton", MiscPage)
-BindBtn.Size, BindBtn.BackgroundColor3, BindBtn.Text, BindBtn.Font, BindBtn.TextColor3, BindBtn.TextSize = UDim2.new(1, -5, 0, 25), Color3.fromRGB(45, 45, 45), "AIM KEY: ["..Settings.AimbotKey.."]", Enum.Font.Code, Color3.new(1, 1, 1), 12
+BindBtn.Size, BindBtn.BackgroundColor3, BindBtn.Text, BindBtn.Font, BindBtn.TextColor3, BindBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(45, 45, 45), "AIM KEY: ["..Settings.AimbotKey.."]", Enum.Font.Code, Color3.new(1, 1, 1), 13
 BindBtn.MouseButton1Click:Connect(function() Settings.IsBinding = true BindBtn.Text = "... PRESS ANY KEY ..." end)
+
 local HideBtn = Instance.new("TextButton", MiscPage)
-HideBtn.Size, HideBtn.BackgroundColor3, HideBtn.Text, HideBtn.Font, HideBtn.TextColor3, HideBtn.TextSize = UDim2.new(1, -5, 0, 25), Color3.fromRGB(45, 45, 45), "HIDE KEY: ["..Settings.HideKey.."]", Enum.Font.Code, Color3.new(1, 1, 1), 12
+HideBtn.Size, HideBtn.BackgroundColor3, HideBtn.Text, HideBtn.Font, HideBtn.TextColor3, HideBtn.TextSize = UDim2.new(1, -5, 0, 30), Color3.fromRGB(45, 45, 45), "HIDE KEY: ["..Settings.HideKey.."]", Enum.Font.Code, Color3.new(1, 1, 1), 13
 HideBtn.MouseButton1Click:Connect(function() Settings.IsBindingHide = true HideBtn.Text = "... PRESS ANY KEY ..." end)
 
 Pages["Combat"].Visible = true
@@ -381,7 +385,11 @@ RunService.RenderStepped:Connect(function()
     end
     if Settings.WalkSpeedEnabled then hum.WalkSpeed = Settings.WalkSpeedValue end
     if Settings.DanceEnabled then
-        if loadedDanceChar ~= char then if currentDanceTrack then currentDanceTrack:Stop() end local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum) currentDanceTrack = animator:LoadAnimation(danceAnim) currentDanceTrack.Looped = true currentDanceTrack:Play() loadedDanceChar = char
+        if loadedDanceChar ~= char then
+            if currentDanceTrack then currentDanceTrack:Stop() end
+            local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+            currentDanceTrack = animator:LoadAnimation(danceAnim)
+            currentDanceTrack.Looped = true currentDanceTrack:Play() loadedDanceChar = char
         elseif currentDanceTrack and not currentDanceTrack.IsPlaying then currentDanceTrack:Play() end
     elseif currentDanceTrack and currentDanceTrack.IsPlaying then currentDanceTrack:Stop() end
     if Settings.FlyEnabled and not Settings.StickToHeadEnabled then
