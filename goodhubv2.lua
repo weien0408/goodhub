@@ -100,6 +100,19 @@ local function ApplyDarkMap(state)
     end
 end
 
+local NightModeConnection = nil
+local function ApplyNightMode(state)
+    if state then
+        Lighting.ClockTime = 0
+        NightModeConnection = Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+            if Settings.NightModeEnabled and Lighting.ClockTime ~= 0 then Lighting.ClockTime = 0 end
+        end)
+    else
+        if NightModeConnection then NightModeConnection:Disconnect() NightModeConnection = nil end
+        Lighting.ClockTime = 14
+    end
+end
+
 local function ApplyFPSBoost(state)
     if state then
         settings().Rendering.QualityLevel = 1
@@ -271,7 +284,7 @@ AddToggle(CombatPage, "Auto Aimbot", "SilentAimEnabled")
 AddToggle(CombatPage, "Auto Fire", "AutoFireEnabled")
 AddToggle(VisualPage, "ESP", "ESPEnabled")
 AddToggle(VisualPage, "Dark Map", "DarkMapEnabled", function(v) ApplyDarkMap(v) end)
-AddToggle(VisualPage, "Night Mode", "NightModeEnabled")
+AddToggle(VisualPage, "Night Mode", "NightModeEnabled", function(v) ApplyNightMode(v) end)
 AddToggle(VisualPage, "4:3 Resolution", "Resolution43Enabled")
 AddToggle(VisualPage, "Crosshair", "CrosshairEnabled")
 AddToggle(VisualPage, "FOV Circle", "FOVEnabled")
@@ -349,7 +362,8 @@ local function GetClosestTarget()
     return target
 end
 
-RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", 201, function() 
+-- 將優先級調到 2000 (最後渲染)，防止跟遊戲相機與畫面互相干擾閃爍
+RunService:BindToRenderStep("SOLIX_SYSTEM_LOCK", 2000, function() 
     if (Settings.AimbotEnabled and Settings.AimbotHolding) or (Settings.SilentAimEnabled and MouseHolding) then
         local target = GetClosestTarget()
         if target then
@@ -364,7 +378,6 @@ end)
 
 RunService.RenderStepped:Connect(function()
     if Settings.ScreenColorEnabled then TintFrame.BackgroundColor3, TintFrame.Visible = Color3.fromRGB(Settings.ScreenColorR, Settings.ScreenColorG, Settings.ScreenColorB), true else TintFrame.Visible = false end
-    Lighting.ClockTime = Settings.NightModeEnabled and 0 or 14
     local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
     if Settings.CrosshairEnabled then
         local theta = math.rad(tick() * Settings.CrosshairSpinSpeed)
